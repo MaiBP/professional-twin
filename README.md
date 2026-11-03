@@ -36,7 +36,6 @@ while it quietly turns everything you do into evidence for your CV and your care
 - [Daily use](#daily-use)
 - [Using it from the terminal](#using-it-from-the-terminal)
 - [Backups](#backups)
-- [Migrating from gemelo-profesional](#migrating-from-gemelo-profesional)
 - [Project structure](#project-structure)
 - [Customize and extend](#customize-and-extend)
 - [Contributing](#contributing) · [License](#license) · [Support](#support-the-project)
@@ -194,27 +193,13 @@ Useful npm scripts:
 | `npm run open` | Start the app in the background if needed and open the browser |
 | `npm run dev` | Development mode with hot reload |
 | `npm run init` | Create missing private files from the templates |
-| `npm run migrate -- <old folder>` | Import a workspace from the older Spanish-named version (see below) |
 | `npm run pdf -- <file.md>` | Convert a Markdown file (CV, letter) into a clean PDF |
 
 ## Backups
 
 Your content lives only on your PC, so back it up. **Settings → Backups → Download backup** gives you a single `.zip` with everything (profile, company, log, projects with their material and chats, CVs, offers) and a `README` inside explaining how to restore it.
 
-To recover (after data loss or on a new PC): **Settings → Restore from a backup**, pick the `.zip` and confirm. Before replacing anything the app keeps an automatic copy of the current state, so a restore can be undone. Store backups somewhere private — they contain personal data. Backups made with the older Spanish-named version can be restored too; they are converted to the new names automatically.
-
-## Migrating from gemelo-profesional
-
-Professional Twin used to be called *gemelo-profesional*, with Spanish folder and file names. If you have a workspace from that version, clone this repository into a new folder and import it:
-
-```bash
-npm run migrate -- <path-to-your-old-gemelo-profesional-folder>
-```
-
-- It **copies** your profile, company context, achievement log, projects, CVs, offers and settings into the new folder, renaming everything to the English names and converting project maps and conversations to the new format.
-- It **never changes or deletes** anything in the old folder: keep it until you have checked the result.
-- It won't overwrite content you already have in the new folder unless you pass `--force`.
-- The conversation history is kept and shown in the app, but Claude chat sessions start fresh (they were tied to the old folder).
+To recover (after data loss or on a new PC): **Settings → Restore from a backup**, pick the `.zip` and confirm. Before replacing anything the app keeps an automatic copy of the current state, so a restore can be undone. Store backups somewhere private — they contain personal data.
 
 ## Project structure
 
@@ -223,7 +208,7 @@ app/server/        local API (Express): files, twin runner, settings, backups, P
 app/client/        web UI (React + Vite); sections registered in src/sections.jsx
 .claude/skills/    the twin's abilities (one folder per command)
 templates/en|es/   empty templates in English and Spanish
-scripts/           init, open the app, Markdown → PDF, legacy migration
+scripts/           init, open the app, Markdown → PDF
 docs/              README images and the interactive tour (GitHub Pages)
 CLAUDE.md          the twin's identity, method and rules
 start.bat          Windows launcher

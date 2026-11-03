@@ -38,7 +38,6 @@ mientras convierte todo lo que haces en evidencia para tu CV y tu plan de carrer
 - [Uso diario](#uso-diario)
 - [Uso desde la terminal](#uso-desde-la-terminal)
 - [Copias de seguridad](#copias-de-seguridad)
-- [Migrar desde gemelo-profesional](#migrar-desde-gemelo-profesional)
 - [Estructura](#estructura)
 - [Personalizar y ampliar](#personalizar-y-ampliar)
 - [Contribuir](#contribuir) · [Licencia](#licencia) · [Apoyar el proyecto](#apoyar-el-proyecto)
@@ -196,27 +195,13 @@ Scripts de npm útiles:
 | `npm run open` | Arrancar la app en segundo plano si hace falta y abrir el navegador |
 | `npm run dev` | Modo desarrollo con recarga en caliente |
 | `npm run init` | Crear los archivos privados que falten desde las plantillas |
-| `npm run migrate -- <carpeta antigua>` | Importar un espacio de la versión anterior con nombres en español (ver abajo) |
 | `npm run pdf -- <archivo.md>` | Convertir un Markdown (CV, carta) en un PDF limpio |
 
 ## Copias de seguridad
 
 Tu contenido vive solo en tu PC: respáldalo. **Configuración → Copias de seguridad → Descargar copia** te da un único `.zip` con todo (perfil, empresa, bitácora, proyectos con su material y conversaciones, CV, ofertas) y un `README` dentro que explica cómo restaurarlo.
 
-Para recuperarlo (tras perder datos o en un PC nuevo): **Configuración → Restaurar desde una copia**, elige el `.zip` y confirma. Antes de sustituir nada, la app guarda una copia automática del estado actual, así que una restauración se puede deshacer. Guarda las copias en un lugar privado: contienen datos personales. También se pueden restaurar copias hechas con la versión anterior con nombres en español: se convierten solas a los nombres nuevos.
-
-## Migrar desde gemelo-profesional
-
-Professional Twin antes se llamaba *gemelo-profesional* y usaba nombres de carpetas y archivos en español. Si tienes un espacio de esa versión, clona este repositorio en una carpeta nueva e impórtalo:
-
-```bash
-npm run migrate -- <ruta-a-tu-carpeta-gemelo-profesional>
-```
-
-- **Copia** tu perfil, el contexto de empresa, la bitácora, los proyectos, los CV, las ofertas y tus ajustes en la carpeta nueva, con los nombres nuevos en inglés, y convierte los mapas de proyecto y las conversaciones al formato nuevo.
-- **Nunca modifica ni borra** nada de la carpeta antigua: consérvala hasta comprobar el resultado.
-- No sobrescribe el contenido que ya tengas en la carpeta nueva salvo que añadas `--force`.
-- El historial de conversaciones se conserva y se ve en la app, pero las sesiones de chat de Claude empiezan de cero (estaban ligadas a la carpeta antigua).
+Para recuperarlo (tras perder datos o en un PC nuevo): **Configuración → Restaurar desde una copia**, elige el `.zip` y confirma. Antes de sustituir nada, la app guarda una copia automática del estado actual, así que una restauración se puede deshacer. Guarda las copias en un lugar privado: contienen datos personales.
 
 ## Estructura
 
@@ -225,7 +210,7 @@ app/server/        API local (Express): archivos, ejecución del gemelo, ajustes
 app/client/        interfaz web (React + Vite); secciones registradas en src/sections.jsx
 .claude/skills/    las capacidades del gemelo (una carpeta por comando)
 templates/en|es/   plantillas vacías en inglés y en español
-scripts/           init, abrir la app, Markdown → PDF, migración
+scripts/           init, abrir la app, Markdown → PDF
 docs/              imágenes del README y recorrido interactivo (GitHub Pages)
 CLAUDE.md          identidad, método y reglas del gemelo
 start.bat          lanzador para Windows
