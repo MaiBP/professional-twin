@@ -1,0 +1,38 @@
+{
+  "name": "professional-twin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Professional Twin: an AI-powered professional twin framework built on Claude Code, with a local web interface.",
+  "type": "module",
+  "scripts": {
+    "init": "node scripts/init.mjs",
+    "build": "vite build",
+    "prestart": "vite build",
+    "start": "node app/server/index.mjs",
+    "dev": "concurrently -n api,web -c blue,green \"node --watch app/server/index.mjs\" \"vite\"",
+    "pdf": "node scripts/md-to-pdf.mjs",
+    "open": "node scripts/open-twin.mjs",
+    "migrate": "node scripts/migrate-legacy.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "express": "^4.22.3",
+    "multer": "^2.5.0"
+  },
+  "devDependencies": {
+    "@dagrejs/dagre": "^1.1.8",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@xyflow/react": "^12.12.1",
+    "concurrently": "^9.2.5",
+    "mermaid": "^11.17.2",
+    "micromark": "^4.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^9.1.0",
+    "remark-gfm": "^4.0.1",
+    "vite": "^6.4.5"
+  }
+}

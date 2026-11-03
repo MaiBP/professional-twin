@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Professional Twin</title>
+<meta name="description" content="An AI-powered professional twin framework built on Claude Code. Local-first: your data stays on your PC.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235b5bd6'/%3E%3Cpath d='M16 6l3 7.5 7.5 3-7.5 3L16 27l-3-7.5L5.5 16.5l7.5-3z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f6f7fc;--bg2:#ffffff;--card:#ffffff;--card2:#f1f3fb;--line:#e1e4f0;--text:#1c2142;--muted:#565d80;
+  --ind:#5052cc;--vio:#7c4ddb;--teal:#0b7f75;--indSoft:#eceeff;--vioSoft:#f3eeff;--tealSoft:#e3f7f3;--red:#c62828;
+  --shadow:0 1px 2px rgba(28,33,66,.06),0 8px 24px rgba(28,33,66,.08);--ring:#5052cc;
+  --grad:linear-gradient(90deg,#5b5bd6,#8b5cf6 55%,#0f9488);
+  --term:#141a31;--termText:#e6e9fb;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1020;--bg2:#10162b;--card:#171e3a;--card2:#1d2546;--line:#2b3460;--text:#e9ecfb;--muted:#a9b1d4;
+  --ind:#9496fb;--vio:#b9a2fd;--teal:#3fd9c4;--indSoft:#232a55;--vioSoft:#2a2350;--tealSoft:#12312f;--red:#f87171;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--ring:#9496fb;
+  --grad:linear-gradient(90deg,#8d8ffa,#b49cfc 55%,#34d6c0);--term:#0a0e1c;--termText:#e6e9fb;
+}}
+:root[data-theme="dark"]{
+  --bg:#0b1020;--bg2:#10162b;--card:#171e3a;--card2:#1d2546;--line:#2b3460;--text:#e9ecfb;--muted:#a9b1d4;
+  --ind:#9496fb;--vio:#b9a2fd;--teal:#3fd9c4;--indSoft:#232a55;--vioSoft:#2a2350;--tealSoft:#12312f;--red:#f87171;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--ring:#9496fb;
+  --grad:linear-gradient(90deg,#8d8ffa,#b49cfc 55%,#34d6c0);--term:#0a0e1c;--termText:#e6e9fb;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--ind)}
+code,kbd,pre,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace}
+code{font-size:.9em;background:var(--card2);padding:.1em .4em;border-radius:6px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+:focus-visible{outline:3px solid var(--ring);outline-offset:3px;border-radius:8px}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--card);padding:8px 12px;border-radius:8px;z-index:100}
+.skip:focus{left:12px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* header */
+header.top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:16px;height:62px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--text);text-decoration:none;white-space:nowrap}
+.logo{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;flex:none}
+nav.links{display:flex;gap:4px;margin-left:auto}
+nav.links a{color:var(--muted);text-decoration:none;font-size:14.5px;font-weight:600;padding:6px 10px;border-radius:8px}
+nav.links a:hover{color:var(--text);background:var(--card2)}
+.tools{display:flex;gap:8px;align-items:center}
+.btn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-size:14.5px;font-weight:650;padding:8px 14px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:transform .15s,border-color .15s,background .15s}
+.btn:hover{border-color:var(--ind)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--ind);border-color:var(--ind);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#0b1020}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#0b1020}}
+.btn.icon{padding:8px 10px}
+.btn svg{width:18px;height:18px}
+
+/* hero */
+.hero{padding:72px 0 40px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-40% -10% auto;height:520px;background:radial-gradient(closest-side,color-mix(in srgb,var(--vio) 22%,transparent),transparent),radial-gradient(closest-side at 70% 60%,color-mix(in srgb,var(--teal) 18%,transparent),transparent);filter:blur(20px);animation:drift 14s ease-in-out infinite alternate;pointer-events:none}
+@keyframes drift{to{transform:translate3d(4%,6%,0) scale(1.05)}}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;font-size:13.5px;font-weight:700;color:var(--teal);background:var(--tealSoft);border:1px solid color-mix(in srgb,var(--teal) 35%,transparent);padding:4px 12px;border-radius:999px}
+.hero h1{font-size:clamp(34px,5.6vw,60px);line-height:1.06;letter-spacing:-.02em;margin:18px 0 14px;max-width:880px;position:relative}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:760px;margin:0 0 26px;position:relative}
+.cta{display:flex;gap:12px;flex-wrap:wrap;position:relative}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px;position:relative}
+.role{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+.role:nth-child(2){animation-delay:.12s}.role:nth-child(3){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.role .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:10px}
+.role h3{margin:0 0 4px;font-size:17px}
+.role p{margin:0;color:var(--muted);font-size:15px}
+
+/* sections */
+section.sec{padding:64px 0;border-top:1px solid var(--line)}
+section.sec:nth-of-type(even){background:var(--bg2)}
+.sec h2{font-size:clamp(26px,3.4vw,36px);letter-spacing:-.015em;margin:0 0 8px}
+.sec .intro{color:var(--muted);margin:0 0 28px;max-width:760px;font-size:17px}
+.kicker{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--vio);margin-bottom:6px}
+
+/* architecture */
+.arch{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:22px;align-items:start}
+.diagram{position:relative;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow)}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;position:relative}
+.toprow{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-bottom:34px}
+.pc{position:relative;border:2px dashed color-mix(in srgb,var(--teal) 70%,transparent);border-radius:18px;padding:30px 14px 16px;background:color-mix(in srgb,var(--teal) 4%,transparent)}
+.pc-tag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--tealSoft);color:var(--teal);border:1px solid var(--teal);border-radius:999px;font-size:13px;font-weight:800;padding:2px 12px;white-space:nowrap}
+.node{appearance:none;font:inherit;color:var(--text);text-align:left;cursor:pointer;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow);position:relative;transition:border-color .2s,transform .2s,box-shadow .2s;min-width:0}
+.node:hover{transform:translateY(-2px);border-color:var(--ind)}
+.node[aria-pressed="true"]{border-color:transparent;background:linear-gradient(var(--card),var(--card)) padding-box,var(--grad) border-box;box-shadow:0 0 0 4px color-mix(in srgb,var(--ind) 18%,transparent),var(--shadow)}
+.node .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;margin-bottom:8px}
+.node b{display:block;font-size:15px;line-height:1.25}
+.node small{display:block;color:var(--muted);font-size:13px;line-height:1.35;margin-top:2px;overflow-wrap:anywhere}
+.toprow .node.pill{width:max-content;max-width:calc(200% + 28px)}.node.pill small{white-space:nowrap}.node.pill{border-radius:999px;display:flex;gap:10px;align-items:center;padding:8px 14px 8px 8px}
+.node.pill .ic{margin:0;border-radius:999px;flex:none}
+.vlink{position:absolute;left:50%;width:2px;height:34px;bottom:-36px;background:repeating-linear-gradient(to bottom,var(--ind) 0 5px,transparent 5px 10px);background-size:2px 20px;animation:vflow 1s linear infinite}
+@keyframes vflow{to{background-position:0 20px}}
+.hlink{position:absolute;top:50%;right:-29px;width:30px;height:2px;background:repeating-linear-gradient(90deg,var(--muted) 0 5px,transparent 5px 10px);background-size:20px 2px;animation:hflow .9s linear infinite;opacity:.7}
+.hlink::after{content:"";position:absolute;top:-3px;left:0;width:8px;height:8px;border-radius:50%;background:var(--teal);animation:ping 1.8s ease-in-out infinite}
+@keyframes hflow{to{background-position:20px 0}}
+@keyframes ping{0%{left:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:calc(100% - 8px);opacity:0}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);position:sticky;top:80px}
+.panel h3{margin:0 0 6px;font-size:20px}
+.panel .tag{font-size:12.5px;font-weight:800;color:var(--teal);text-transform:uppercase;letter-spacing:.06em}
+.panel p{color:var(--muted);margin:8px 0}
+.panel ul{margin:8px 0 0;padding-left:20px}
+.panel li{margin:4px 0}
+.fadein{animation:fadein .35s ease both}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}}
+.hint{font-size:13.5px;color:var(--muted);margin-top:14px;display:flex;gap:6px;align-items:center}
+
+/* journey */
+.stepper{display:flex;gap:0;position:relative;margin:8px 0 18px;padding:0;list-style:none;overflow-x:auto;scrollbar-width:thin}
+.stepper::before{content:"";position:absolute;left:28px;right:28px;top:27px;height:4px;border-radius:4px;background:var(--line)}
+.stepper .fill{position:absolute;left:28px;top:27px;height:4px;border-radius:4px;background:var(--grad);transition:width .5s ease;z-index:0}
+.stepper li{flex:1 1 0;min-width:96px;position:relative;z-index:1;text-align:center}
+.step{appearance:none;background:none;border:0;font:inherit;color:var(--text);cursor:pointer;padding:4px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;border-radius:12px}
+.step .n{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:var(--ind);background:var(--card);border:2px solid var(--ind);box-shadow:var(--shadow);transition:all .25s;position:relative;margin-top:6px}
+.step .lbl{font-size:14px;font-weight:700;line-height:1.25}
+.step.done .n{background:var(--indSoft)}
+.step.done .n::after{content:"";position:absolute;right:-6px;top:-6px;width:18px;height:18px;border-radius:50%;background:var(--teal) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.2l2.7 2.7L13 6.5' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
+.step[aria-selected="true"] .n{background:var(--grad);color:#fff;border-color:transparent;transform:scale(1.12);box-shadow:0 0 0 7px color-mix(in srgb,var(--vio) 20%,transparent)}
+.jcard{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow)}
+.jcard h3{margin:0 0 4px;font-size:22px}
+.jcard p{margin:6px 0;color:var(--muted)}
+.jmeta{background:var(--card2);border-radius:14px;padding:16px}
+.jmeta dt{font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--vio);margin-top:8px}
+.jmeta dt:first-child{margin-top:0}
+.jmeta dd{margin:2px 0 0;font-size:15px}
+.approve{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-weight:700;color:var(--teal);background:var(--tealSoft);border-radius:999px;padding:5px 12px;font-size:14px}
+.jctrl{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.jctrl .count{color:var(--muted);font-size:14px;margin-left:auto}
+.flowout{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:22px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:650;font-size:14.5px;box-shadow:var(--shadow)}
+.chip.t{color:var(--teal);border-color:color-mix(in srgb,var(--teal) 45%,transparent);background:var(--tealSoft)}
+.arrow{color:var(--muted)}
+
+/* what happens */
+.seq{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:start}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.steps li{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;transition:opacity .3s,border-color .3s,transform .3s,box-shadow .3s}
+.steps .num{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--indSoft);color:var(--ind)}
+.steps b{display:block;font-size:15.5px}
+.steps span.d{color:var(--muted);font-size:14.5px}
+.steps .lane{display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:1px 8px;border-radius:999px;margin-bottom:3px}
+.lane.l0{background:var(--vioSoft);color:var(--vio)}.lane.l1,.lane.l2{background:var(--indSoft);color:var(--ind)}.lane.l3{background:var(--tealSoft);color:var(--teal)}
+.steps.running li{opacity:.45}
+.steps.running li.on{opacity:1;border-color:var(--ind);transform:translateX(4px);box-shadow:var(--shadow)}
+.steps.running li.on .num{background:var(--grad);color:#fff}
+.steps li.past{opacity:1!important}
+.steps li.past .num{background:var(--tealSoft);color:var(--teal)}
+.term{background:var(--term);color:var(--termText);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--line)}
+.term .tbar{display:flex;gap:6px;align-items:center;padding:10px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);font-size:13px;color:#a9b1d4}
+.term .tbar i{width:11px;height:11px;border-radius:50%;background:#ff5f57;display:inline-block}
+.term .tbar i:nth-child(2){background:#febc2e}.term .tbar i:nth-child(3){background:#28c840;margin-right:8px}
+.term pre{margin:0;padding:16px;font-size:13.5px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;min-height:230px}
+.term .ok{color:#5eead4}.term .dim{color:#8f98c2}.term .acc{color:#b9a2fd}
+.caret{display:inline-block;width:8px;height:1.05em;background:#e6e9fb;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* privacy */
+.priv{display:grid;grid-template-columns:1fr;gap:22px}.priv img{max-width:980px;margin:0 auto}
+.priv img{width:100%;height:auto;display:block;border-radius:18px}
+.plist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.plist li{display:grid;grid-template-columns:36px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.plist .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--tealSoft);color:var(--teal)}
+.plist b{display:block}
+.plist span{color:var(--muted);font-size:14.5px}
+
+/* commands */
+.cmds{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.cmd{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
+.cmd:hover{transform:translateY(-3px);border-color:var(--vio)}
+.cmd code{font-size:15px;font-weight:700;color:var(--vio);background:var(--vioSoft)}
+.cmd p{margin:8px 0 0;color:var(--muted);font-size:14.5px}
+
+/* gallery */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.gallery figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.gallery a{display:block}
+.gallery a{overflow:hidden;background:var(--card2);height:230px}.gallery img{width:100%;height:auto;display:block;transition:transform .4s}
+.gallery a:hover img{transform:scale(1.03)}
+.gallery figcaption{padding:10px 14px;font-size:14.5px;color:var(--muted)}
+.gallery figcaption b{color:var(--text)}
+
+/* quick start */
+.qs{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;align-items:start}
+.term .copy{margin-left:auto;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#e6e9fb;font:inherit;font-size:12.5px;padding:3px 10px;border-radius:8px;cursor:pointer}
+.term .copy:focus-visible{outline-color:#b9a2fd}
+.req{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.req li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.req b{display:block}.req span{color:var(--muted);font-size:14.5px}
+
+footer{padding:36px 0 48px;border-top:1px solid var(--line);color:var(--muted);font-size:14.5px}
+footer .wrap{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+
+@media (max-width:960px){
+  nav.links{display:none}
+  .tools{margin-left:auto}
+  .arch,.seq,.priv,.qs,.jcard{grid-template-columns:1fr}
+  .panel{position:static}
+}
+@media (max-width:720px){
+  .roles{grid-template-columns:1fr}
+  .row,.toprow{grid-template-columns:1fr 1fr;gap:20px}
+  .hlink,.vlink{display:none}
+  .toprow{margin-bottom:24px}
+  .toprow .spacer{display:none}
+  .hero{padding-top:44px}
+  .brand span.full{display:none}
+  .btn.gh span{display:none}
+}
+@media (max-width:420px){.row,.toprow{grid-template-columns:1fr}.toprow .node.pill{max-width:100%}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+<header class="top">
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="Professional Twin">
+      <span class="logo" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2l2.8 7.2L22 12l-7.2 2.8L12 22l-2.8-7.2L2 12l7.2-2.8z" fill="#fff"/></svg></span>
+      <span class="full" data-i18n="brand">Professional Twin</span>
+    </a>
+    <nav class="links" aria-label="Sections">
+      <a href="#how" data-i18n="nav_how">How it works</a>
+      <a href="#journey" data-i18n="nav_journey">Journey</a>
+      <a href="#privacy" data-i18n="nav_privacy">Privacy</a>
+      <a href="#commands" data-i18n="nav_commands">Commands</a>
+      <a href="#start" data-i18n="nav_start">Quick start</a>
+    </nav>
+    <div class="tools">
+      <button class="btn" id="langBtn" type="button" aria-label="Cambiar a español"><span id="langLbl">ES</span></button>
+      <button class="btn icon" id="themeBtn" type="button" aria-label="Switch theme">
+        <svg id="themeIc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"></svg>
+      </button>
+      <a class="btn gh" href="https://github.com/MaiBP/professional-twin" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.8 7.2L22 12l-7.2 2.8L12 22l-2.8-7.2L2 12l7.2-2.8z" fill="currentColor"/></svg><span data-i18n="eyebrow">Built on Claude Code · runs on your PC</span></span>
+    <h1><span data-i18n="h1a">An AI-powered</span> <span class="grad" data-i18n="h1b">professional twin</span> <span data-i18n="h1c">framework built on Claude Code.</span></h1>
+    <p class="lead" data-i18n="lead">It knows your experience, applies your criteria and works with you from a business need to a delivered solution, while it quietly turns everything you do into evidence for your CV and your career plan.</p>
+    <div class="cta">
+      <a class="btn primary" href="#start" data-i18n="cta_start">Quick start</a>
+      <a class="btn" href="#how" data-i18n="cta_tour">Take the tour</a>
+      <a class="btn" href="https://github.com/MaiBP/professional-twin" rel="noopener" data-i18n="cta_repo">View on GitHub</a>
+    </div>
+    <div class="roles">
+      <article class="role"><div class="ic" style="background:var(--indSoft);color:var(--ind)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg></div><h3 data-i18n="r1t">Co-worker</h3><p data-i18n="r1d">Analyses needs, plans, documents, builds prototypes, code, dashboards and presentations.</p></article>
+      <article class="role"><div class="ic" style="background:var(--vioSoft);color:var(--vio)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg></div><h3 data-i18n="r2t">Mentor</h3><p data-i18n="r2d">Challenges your ideas with good practices, flags risks and shows how someone one level above would do it.</p></article>
+      <article class="role"><div class="ic" style="background:var(--tealSoft);color:var(--teal)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5M14 3v5h5"/></svg></div><h3 data-i18n="r3t">Career chronicler</h3><p data-i18n="r3d">Logs every achievement with evidence, so your CV and career plan build themselves.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <div class="kicker" data-i18n="k_how">Architecture</div>
+    <h2 id="how-h" data-i18n="how_h">How it works</h2>
+    <p class="intro" data-i18n="how_p">Two halves work on the same plain Markdown files on your computer: a local web app (the window) and Claude Code (the brain). Click any piece to learn what it does.</p>
+    <div class="arch">
+      <div class="diagram" role="group" aria-labelledby="how-h">
+        <div class="toprow">
+          <button class="node pill" type="button" data-node="you" aria-pressed="false" aria-controls="archPanel"><span class="ic" style="background:var(--vioSoft);color:var(--vio)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-5 4.5-7 8-7s6.5 2 8 7"/></svg></span><span><b data-i18n="n_you">You</b><small data-i18n="n_you_s">buttons & chat</small></span><span class="vlink" aria-hidden="true"></span></button>
+          <span class="spacer"></span>
+          <button class="node pill" type="button" data-node="anthropic" aria-pressed="false" aria-controls="archPanel"><span class="ic" style="background:var(--indSoft);color:var(--ind)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 19h11a4.5 4.5 0 0 0 .6-9 6 6 0 0 0-11.5-1.5A5 5 0 0 0 7 19z"/></svg></span><span><b data-i18n="n_anth">Anthropic</b><small data-i18n="n_anth_s">your Claude account</small></span><span class="vlink" aria-hidden="true"></span></button>
+          <span class="spacer"></span>
+        </div>
+        <div class="pc">
+          <span class="pc-tag" data-i18n="pc_tag">Runs on your PC</span>
+          <div class="row">
+            <button class="node" type="button" data-node="browser" aria-pressed="false" aria-controls="archPanel"><span class="ic" style="background:var(--vioSoft);color:var(--vio)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 9h20"/></svg></span><b data-i18n="n_browser">Browser app</b><small>localhost:3210</small><span class="hlink" aria-hidden="true"></span></button>
+            <button class="node" type="button" data-node="server" aria-pressed="false" aria-controls="archPanel"><span class="ic" style="background:var(--indSoft);color:var(--ind)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/></svg></span><b data-i18n="n_server">Local server</b><small>127.0.0.1</small><span class="hlink" aria-hidden="true"></span></button>
+            <button class="node" type="button" data-node="claude" aria-pressed="false" aria-controls="archPanel"><span class="ic" style="background:var(--indSoft);color:var(--ind)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.8 7.2L22 12l-7.2 2.8L12 22l-2.8-7.2L2 12l7.2-2.8z" fill="currentColor"/></svg></span><b>Claude Code</b><small data-i18n="n_claude_s">your twin</small><span class="hlink" aria-hidden="true"></span></button>
+            <button class="node" type="button" data-node="files" aria-pressed="false" aria-controls="archPanel"><span class="ic" style="background:var(--tealSoft);color:var(--teal)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 2h9l5 5v15H5z"/><path d="M14 2v5h5M8 13h8M8 17h6"/></svg></span><b data-i18n="n_files">Your private files</b><small data-i18n="n_files_s">Markdown</small></button>
+          </div>
+        </div>
+        <p class="hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 11V5a2 2 0 0 1 4 0v6m0-2a2 2 0 0 1 4 0v4a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2-3a2 2 0 0 1 3-2l2 2"/></svg><span data-i18n="arch_hint">Click a component to see what it does.</span></p>
+      </div>
+      <aside class="panel" id="archPanel" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="journey" aria-labelledby="journey-h">
+  <div class="wrap">
+    <div class="kicker" data-i18n="k_journey">From need to delivered solution</div>
+    <h2 id="journey-h" data-i18n="journey_h">The project journey</h2>
+    <p class="intro" data-i18n="journey_p">Seven phases. Nothing moves forward without your approval. Use the arrows, your keyboard (← →) or let it play.</p>
+    <ol class="stepper" id="stepper" role="tablist" aria-labelledby="journey-h"><span class="fill" id="stepFill" aria-hidden="true"></span></ol>
+    <div class="jcard" id="jcard" role="tabpanel" aria-live="polite"></div>
+    <div class="jctrl">
+      <button class="btn" type="button" id="jPrev"><span aria-hidden="true">←</span> <span data-i18n="prev">Previous</span></button>
+      <button class="btn" type="button" id="jNext"><span data-i18n="next">Next</span> <span aria-hidden="true">→</span></button>
+      <button class="btn" type="button" id="jPlay" aria-pressed="false"></button>
+      <span class="count" id="jCount"></span>
+    </div>
+    <div class="flowout" aria-label="Outputs">
+      <span class="chip" data-i18n="o_map">Project map</span><span class="chip" data-i18n="o_dec">Decisions</span><span class="chip" data-i18n="o_ach">Achievements</span>
+      <span class="arrow" aria-hidden="true">→</span><span class="chip t" data-i18n="o_jou">Journal</span>
+      <span class="arrow" aria-hidden="true">→</span><span class="chip t" data-i18n="o_cv">Tailored CV</span><span class="chip t" data-i18n="o_off">Job-offer fit</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="happens" aria-labelledby="happens-h">
+  <div class="wrap">
+    <div class="kicker" data-i18n="k_happens">Under the hood</div>
+    <h2 id="happens-h" data-i18n="happens_h">What happens when you press a button</h2>
+    <p class="intro" data-i18n="happens_p">The app launches Claude Code in the background for you, and you watch every step live.</p>
+    <div class="seq">
+      <div>
+        <ol class="steps" id="seqSteps"></ol>
+        <div class="jctrl"><button class="btn primary" type="button" id="seqPlay"></button></div>
+      </div>
+      <div class="term" aria-label="Live progress">
+        <div class="tbar"><i></i><i></i><i></i><span data-i18n="live">Live progress</span></div>
+        <pre id="seqLog" aria-live="polite"></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="privacy" aria-labelledby="privacy-h">
+  <div class="wrap">
+    <div class="kicker" data-i18n="k_privacy">Local-first</div>
+    <h2 id="privacy-h" data-i18n="privacy_h">Privacy by design</h2>
+    <p class="intro" data-i18n="privacy_p">Your files live on your PC and are never uploaded to the project. Only the text a task needs goes to Claude, through your own account.</p>
+    <div class="priv">
+      <img id="privImg" src="images/privacy-light.svg" width="960" height="486" alt="">
+      <ul class="plist">
+        <li><span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M1 20h22"/></svg></span><div><b data-i18n="p1t">Stays on your PC</b><span data-i18n="p1d">profile/, context/, journal/, projects/, cv/, offers/, backups/ and settings.json are git-ignored and never uploaded.</span></div></li>
+        <li><span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 19h11a4.5 4.5 0 0 0 .6-9 6 6 0 0 0-11.5-1.5A5 5 0 0 0 7 19z"/></svg></span><div><b data-i18n="p2t">Only what the task needs</b><span data-i18n="p2d">Claude Code sends the text it needs to Anthropic through your own account (subscription or Console).</span></div></li>
+        <li><span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="10" width="16" height="12" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><div><b data-i18n="p3t">No credentials stored</b><span data-i18n="p3d">The app never sees your password: login is handled by Claude Code.</span></div></li>
+        <li><span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 2v3M12 7v2M12 11v2"/></svg></span><div><b data-i18n="p4t">Backups you control</b><span data-i18n="p4d">Backups are local .zip files you download. Nothing goes to the project's GitHub.</span></div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="commands" aria-labelledby="commands-h">
+  <div class="wrap">
+    <div class="kicker" data-i18n="k_commands">Skills</div>
+    <h2 id="commands-h" data-i18n="commands_h">Commands</h2>
+    <p class="intro" data-i18n="commands_p">Every button in the app runs one of these skills. Power users can type them in Claude Code inside the project folder.</p>
+    <div class="cmds" id="cmds"></div>
+  </div>
+</section>
+
+<section class="sec" id="gallery" aria-labelledby="gallery-h">
+  <div class="wrap">
+    <div class="kicker" data-i18n="k_gallery">Screenshots</div>
+    <h2 id="gallery-h" data-i18n="gallery_h">A look at the app</h2>
+    <div class="gallery" id="gal"></div>
+  </div>
+</section>
+
+<section class="sec" id="start" aria-labelledby="start-h">
+  <div class="wrap">
+    <div class="kicker" data-i18n="k_start">Five commands</div>
+    <h2 id="start-h" data-i18n="start_h">Quick start</h2>
+    <p class="intro" data-i18n="start_p">Then open http://localhost:3210, connect Claude Code in Settings, and start your onboarding.</p>
+    <div class="qs">
+      <div class="term">
+        <div class="tbar"><i></i><i></i><i></i><span data-i18n="terminal">Terminal</span><button class="copy" type="button" id="copyBtn" data-i18n="copy">Copy</button></div>
+<pre id="qsCode"><span class="dim">$</span> git clone https://github.com/MaiBP/professional-twin.git
+<span class="dim">$</span> cd professional-twin
+<span class="dim">$</span> npm install
+<span class="dim">$</span> npm run init     <span class="dim" data-i18n="c_init"># create your private folders</span>
+<span class="dim">$</span> npm start        <span class="dim" data-i18n="c_start"># opens http://localhost:3210</span></pre>
+      </div>
+      <ul class="req">
+        <li><b>Node.js 20+</b><span data-i18n="req1">Runs the local app.</span></li>
+        <li><b>Git</b><span data-i18n="req2">Downloads the project (or grab the ZIP from GitHub).</span></li>
+        <li><b>Claude Code</b><span data-i18n="req3">The twin's brain.</span></li>
+        <li><b data-i18n="req4t">A Claude account</b><span data-i18n="req4">Claude Pro, Max, Team or Enterprise subscription, or an Anthropic Console account (pay as you go).</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><b data-i18n="brand">Professional Twin</b> · <span data-i18n="foot">MIT licensed · your data stays on your PC</span></span>
+    <span><a href="https://github.com/MaiBP/professional-twin" rel="noopener" data-i18n="f_repo">Repository</a> · <a href="https://github.com/MaiBP/professional-twin#readme" rel="noopener">README</a> · <a href="https://github.com/MaiBP/professional-twin/blob/main/README.es.md" rel="noopener" data-i18n="f_es">Español</a> · <a href="https://github.com/MaiBP/professional-twin/blob/main/LICENSE" rel="noopener" data-i18n="f_lic">License</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+var store = {
+  get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},
+  set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+};
+var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+var T = {
+ en:{
+  skip:'Skip to content',brand:'Professional Twin',nav_how:'How it works',nav_journey:'Journey',nav_privacy:'Privacy',nav_commands:'Commands',nav_start:'Quick start',
+  eyebrow:'Built on Claude Code · runs on your PC',h1a:'An AI-powered',h1b:'professional twin',h1c:'framework built on Claude Code.',
+  lead:'It knows your experience, applies your criteria and works with you from a business need to a delivered solution, while it quietly turns everything you do into evidence for your CV and your career plan.',
+  cta_start:'Quick start',cta_tour:'Take the tour',cta_repo:'View on GitHub',
+  r1t:'Co-worker',r1d:'Analyses needs, plans, documents, builds prototypes, code, dashboards and presentations.',
+  r2t:'Mentor',r2d:'Challenges your ideas with good practices, flags risks and shows how someone one level above would do it.',
+  r3t:'Career chronicler',r3d:'Logs every achievement with evidence, so your CV and career plan build themselves.',
+  k_how:'Architecture',how_h:'How it works',how_p:'Two halves work on the same plain Markdown files on your computer: a local web app (the window) and Claude Code (the brain). Click any piece to learn what it does.',
+  n_you:'You',n_you_s:'buttons & chat',n_anth:'Anthropic',n_anth_s:'your Claude account',pc_tag:'Runs on your PC',n_browser:'Browser app',n_server:'Local server',n_claude_s:'your twin',n_files:'Your private files',n_files_s:'Markdown',
+  arch_hint:'Click a component to see what it does.',
+  k_journey:'From need to delivered solution',journey_h:'The project journey',journey_p:'Seven phases. Nothing moves forward without your approval. Use the arrows, your keyboard (← →) or let it play.',
+  prev:'Previous',next:'Next',play:'Play',pause:'Pause',phase:'Phase',of:'of',
+  o_map:'Project map',o_dec:'Decisions',o_ach:'Achievements',o_jou:'Journal',o_cv:'Tailored CV',o_off:'Job-offer fit',
+  j_does:'Gate',j_next:'You review it and approve; then the twin moves to the next phase.',j_out:'Files written',j_appr:'Closed only with your approval',
+  k_happens:'Under the hood',happens_h:'What happens when you press a button',happens_p:'The app launches Claude Code in the background for you, and you watch every step live.',
+  live:'Live progress',seq_play:'Play the sequence',seq_again:'Play again',seq_running:'Running…',
+  k_privacy:'Local-first',privacy_h:'Privacy by design',privacy_p:'Your files live on your PC and are never uploaded to the project. Only the text a task needs goes to Claude, through your own account.',
+  priv_alt:'Privacy diagram: your files, the app, Claude Code and backups stay on your PC; only the text needed for a task goes to Anthropic via your Claude account; nothing goes to the GitHub repository.',
+  p1t:'Stays on your PC',p1d:'profile/, context/, journal/, projects/, cv/, offers/, backups/ and settings.json are git-ignored and never uploaded.',
+  p2t:'Only what the task needs',p2d:'Claude Code sends the text it needs to Anthropic through your own account (subscription or Console).',
+  p3t:'No credentials stored',p3d:'The app never sees your password: login is handled by Claude Code.',
+  p4t:'Backups you control',p4d:'Backups are local .zip files you download. Nothing goes to the project’s GitHub.',
+  k_commands:'Skills',commands_h:'Commands',commands_p:'Every button in the app runs one of these skills. Power users can type them in Claude Code inside the project folder.',
+  k_gallery:'Screenshots',gallery_h:'A look at the app',
+  k_start:'Five commands',start_h:'Quick start',start_p:'Then open http://localhost:3210, connect Claude Code in Settings, and start your onboarding.',
+  terminal:'Terminal',copy:'Copy',copied:'Copied!',c_init:'# create your private folders',c_start:'# opens http://localhost:3210',
+  req1:'Runs the local app.',req2:'Downloads the project (or grab the ZIP from GitHub).',req3:'The twin’s brain.',req4t:'A Claude account',req4:'Claude Pro, Max, Team or Enterprise subscription, or an Anthropic Console account (pay as you go).',
+  foot:'MIT licensed · your data stays on your PC',f_repo:'Repository',f_es:'Español',f_lic:'License',
+  langAria:'Cambiar a español',themeToDark:'Switch to dark theme',themeToLight:'Switch to light theme'
+ },
+ es:{
+  skip:'Saltar al contenido',brand:'Gemelo profesional',nav_how:'Cómo funciona',nav_journey:'Recorrido',nav_privacy:'Privacidad',nav_commands:'Comandos',nav_start:'Empezar',
+  eyebrow:'Sobre Claude Code · se ejecuta en tu PC',h1a:'Un marco de',h1b:'gemelo profesional',h1c:'con IA, construido sobre Claude Code.',
+  lead:'Conoce tu experiencia, aplica tu criterio y trabaja contigo desde una necesidad de negocio hasta una solución entregada, mientras convierte todo lo que haces en evidencia para tu CV y tu plan de carrera.',
+  cta_start:'Empezar',cta_tour:'Ver el recorrido',cta_repo:'Ver en GitHub',
+  r1t:'Compañero de trabajo',r1d:'Analiza necesidades, planifica, documenta y construye prototipos, código, cuadros de mando y presentaciones.',
+  r2t:'Mentor',r2d:'Cuestiona tus ideas con buenas prácticas, señala riesgos y muestra cómo lo haría alguien un nivel por encima.',
+  r3t:'Cronista de carrera',r3d:'Registra cada logro con evidencias, para que tu CV y tu plan de carrera se escriban solos.',
+  k_how:'Arquitectura',how_h:'Cómo funciona',how_p:'Dos mitades trabajan sobre los mismos archivos Markdown de tu ordenador: una app web local (la ventana) y Claude Code (el cerebro). Pulsa cualquier pieza para ver qué hace.',
+  n_you:'Tú',n_you_s:'botones y chat',n_anth:'Anthropic',n_anth_s:'tu cuenta de Claude',pc_tag:'Se ejecuta en tu PC',n_browser:'App en el navegador',n_server:'Servidor local',n_claude_s:'tu gemelo',n_files:'Tus archivos privados',n_files_s:'Markdown',
+  arch_hint:'Pulsa un componente para ver qué hace.',
+  k_journey:'De la necesidad a la solución entregada',journey_h:'El recorrido de un proyecto',journey_p:'Siete fases. Nada avanza sin tu aprobación. Usa las flechas, el teclado (← →) o deja que se reproduzca.',
+  prev:'Anterior',next:'Siguiente',play:'Reproducir',pause:'Pausa',phase:'Fase',of:'de',
+  o_map:'Mapa del proyecto',o_dec:'Decisiones',o_ach:'Logros',o_jou:'Bitácora',o_cv:'CV a medida',o_off:'Encaje con ofertas',
+  j_does:'Control',j_next:'Lo revisas y lo apruebas; entonces el gemelo pasa a la siguiente fase.',j_out:'Archivos que escribe',j_appr:'Se cierra solo con tu aprobación',
+  k_happens:'Por dentro',happens_h:'Qué pasa cuando pulsas un botón',happens_p:'La app lanza Claude Code en segundo plano por ti, y ves cada paso en vivo.',
+  live:'Progreso en vivo',seq_play:'Reproducir la secuencia',seq_again:'Reproducir otra vez',seq_running:'En marcha…',
+  k_privacy:'Local primero',privacy_h:'Privacidad por diseño',privacy_p:'Tus archivos viven en tu PC y nunca se suben al proyecto. A Claude solo va el texto que la tarea necesita, con tu propia cuenta.',
+  priv_alt:'Diagrama de privacidad: tus archivos, la app, Claude Code y las copias se quedan en tu PC; a Anthropic solo va el texto que la tarea necesita, con tu cuenta de Claude; nada va al repositorio de GitHub.',
+  p1t:'Se queda en tu PC',p1d:'profile/, context/, journal/, projects/, cv/, offers/, backups/ y settings.json están en .gitignore y nunca se suben.',
+  p2t:'Solo lo que la tarea necesita',p2d:'Claude Code envía a Anthropic el texto que necesita, con tu propia cuenta (suscripción o Console).',
+  p3t:'Sin credenciales guardadas',p3d:'La app nunca ve tu contraseña: el inicio de sesión lo gestiona Claude Code.',
+  p4t:'Copias bajo tu control',p4d:'Las copias son archivos .zip locales que descargas tú. Nada va al GitHub del proyecto.',
+  k_commands:'Skills',commands_h:'Comandos',commands_p:'Cada botón de la app ejecuta una de estas skills. Si te manejas con la terminal, puedes escribirlas en Claude Code dentro de la carpeta del proyecto.',
+  k_gallery:'Capturas',gallery_h:'Un vistazo a la app',
+  k_start:'Cinco comandos',start_h:'Empezar',start_p:'Después abre http://localhost:3210, conecta Claude Code en Configuración y empieza tu onboarding.',
+  terminal:'Terminal',copy:'Copiar',copied:'¡Copiado!',c_init:'# crea tus carpetas privadas',c_start:'# abre http://localhost:3210',
+  req1:'Ejecuta la app local.',req2:'Descarga el proyecto (o baja el ZIP desde GitHub).',req3:'El cerebro del gemelo.',req4t:'Una cuenta de Claude',req4:'Suscripción Claude Pro, Max, Team o Enterprise, o una cuenta de Anthropic Console (pago por uso).',
+  foot:'Licencia MIT · tus datos se quedan en tu PC',f_repo:'Repositorio',f_es:'Español',f_lic:'Licencia',
+  langAria:'Switch to English',themeToDark:'Cambiar a tema oscuro',themeToLight:'Cambiar a tema claro'
+ }
+};
+
+var NODES = {
+ you:{en:['You','The person','You work with buttons, forms and a chat. No prompts to write, no commands to learn.',['Upload your CV and documents','Describe a need in your own words','Approve each phase before it moves on','Power users can drive the same twin from the terminal']],
+      es:['Tú','La persona','Trabajas con botones, formularios y un chat. Sin prompts que escribir ni comandos que aprender.',['Sube tu CV y documentos','Describe una necesidad con tus palabras','Aprueba cada fase antes de avanzar','Desde la terminal puedes usar el mismo gemelo']]},
+ browser:{en:['Browser app','The window','A React interface at http://localhost:3210 that shows your profile, projects, journal, CVs and job offers.',['Upload and edit with forms','Chat with your twin per project','Watch the twin’s steps live','English or Spanish, light or dark']],
+      es:['App en el navegador','La ventana','Una interfaz React en http://localhost:3210 que muestra tu perfil, proyectos, bitácora, CV y ofertas.',['Sube y edita con formularios','Chatea con tu gemelo en cada proyecto','Ve los pasos del gemelo en vivo','Inglés o español, claro u oscuro']]},
+ server:{en:['Local server','The bridge','An Express server that only listens on 127.0.0.1, so nothing outside your PC can reach it.',['Checks that your Claude account is connected','Launches Claude Code headless (claude -p) with the right skill and project id','Streams each step back to the browser','Saves the chat in conversation.json']],
+      es:['Servidor local','El puente','Un servidor Express que solo escucha en 127.0.0.1: nada fuera de tu PC puede llegar a él.',['Comprueba que tu cuenta de Claude está conectada','Lanza Claude Code sin interfaz (claude -p) con la skill y el id del proyecto','Envía cada paso al navegador en vivo','Guarda el chat en conversation.json']]},
+ claude:{en:['Claude Code','The brain: your twin','Its identity and method live in CLAUDE.md and its abilities in .claude/skills/. It plays three roles: co-worker, mentor and career chronicler.',['Reads your profile and project files','Asks questions in batches, like a good consultant','Writes documents, maps, decisions and achievements','Never closes a phase without your approval']],
+      es:['Claude Code','El cerebro: tu gemelo','Su identidad y su método están en CLAUDE.md y sus capacidades en .claude/skills/. Cumple tres roles: compañero de trabajo, mentor y cronista de carrera.',['Lee tu perfil y los archivos del proyecto','Pregunta en tandas, como un buen consultor','Escribe documentos, mapas, decisiones y logros','Nunca cierra una fase sin tu aprobación']]},
+ files:{en:['Your private files','Plain Markdown on your PC','Everything the twin knows lives in readable files you own. They are git-ignored and never uploaded.',['profile/ · context/ · journal/','projects/ · cv/ · offers/','backups/ (local .zip files)','settings.json (language and theme)']],
+      es:['Tus archivos privados','Markdown en tu PC','Todo lo que sabe el gemelo vive en archivos legibles que son tuyos. Están en .gitignore y nunca se suben.',['profile/ · context/ · journal/','projects/ · cv/ · offers/','backups/ (copias .zip locales)','settings.json (idioma y tema)']]},
+ anthropic:{en:['Anthropic','Through your own Claude account','Claude Code sends only the text a task needs, using your Claude subscription or Console account.',['The app stores no credentials','Login is handled by Claude Code','Nothing goes to the project’s GitHub']],
+      es:['Anthropic','Con tu propia cuenta de Claude','Claude Code envía solo el texto que la tarea necesita, con tu suscripción de Claude o tu cuenta de Console.',['La app no guarda credenciales','El inicio de sesión lo gestiona Claude Code','Nada va al GitHub del proyecto']]}
+};
+
+var PHASES = {
+ en:[
+  ['Capture','You describe the need in your own words. The twin opens a project and records the problem, who is affected and why it matters.','00-need.md'],
+  ['Discovery','The twin asks the questions a good consultant would ask, in batches, and maps people, systems and data around the need.','01-discovery.md · map.md'],
+  ['Definition','Together you define the problem and the solution: scope, options and every decision with its reason.','02-definition.md · decisions.md'],
+  ['Plan','Steps, risks, dependencies and how success will be measured, so the work is predictable.','03-plan.md'],
+  ['Build','The twin builds with you: documents, prototypes, code, dashboards or presentations, and challenges weak spots as a mentor.','product/'],
+  ['Delivery & adoption','Ship it, help people adopt it and capture results with evidence.','04-delivery.md'],
+  ['Closure','Lessons learned. Achievements are written as action + result and go to your journal, ready for your CV.','05-closure.md · journal/']
+ ],
+ es:[
+  ['Captura','Describes la necesidad con tus palabras. El gemelo abre un proyecto y registra el problema, a quién afecta y por qué importa.','00-need.md'],
+  ['Descubrimiento','El gemelo hace las preguntas que haría un buen consultor, en tandas, y mapea personas, sistemas y datos alrededor de la necesidad.','01-discovery.md · map.md'],
+  ['Definición','Tú y el gemelo definen el problema y la solución: alcance, opciones y cada decisión con su motivo.','02-definition.md · decisions.md'],
+  ['Plan','Pasos, riesgos, dependencias y cómo se medirá el éxito, para que el trabajo sea predecible.','03-plan.md'],
+  ['Construcción','El gemelo construye contigo: documentos, prototipos, código, cuadros de mando o presentaciones, y como mentor cuestiona los puntos débiles.','product/'],
+  ['Entrega y adopción','Se entrega, se acompaña la adopción y se recogen los resultados con evidencias.','04-delivery.md'],
+  ['Cierre','Lecciones aprendidas. Los logros se escriben como acción + resultado y pasan a tu bitácora, listos para tu CV.','05-closure.md · journal/']
+ ]
+};
+
+var LANES = {en:['You · browser','Local server','Claude Code','Your files'],es:['Tú · navegador','Servidor local','Claude Code','Tus archivos']};
+var SEQ = {
+ en:[[0,'You press a button','or send a chat message, for example “Advance” on a project.'],
+     [1,'The server checks your Claude account','It listens on 127.0.0.1 only and confirms Claude Code is connected.'],
+     [1,'It launches claude -p','Headless Claude Code with the right skill and the project id.'],
+     [2,'Claude reads and writes your files','Profile, project documents, map, decisions, journal.'],
+     [2,'Each step streams back live','You watch the twin work in the app, step by step.'],
+     [0,'The app re-reads the files','Tabs update on their own; the chat is saved in conversation.json.']],
+ es:[[0,'Pulsas un botón','o escribes en el chat, por ejemplo «Avanzar» en un proyecto.'],
+     [1,'El servidor comprueba tu cuenta de Claude','Solo escucha en 127.0.0.1 y confirma que Claude Code está conectado.'],
+     [1,'Lanza claude -p','Claude Code sin interfaz, con la skill adecuada y el id del proyecto.'],
+     [2,'Claude lee y escribe tus archivos','Perfil, documentos del proyecto, mapa, decisiones, bitácora.'],
+     [2,'Cada paso llega en vivo','Ves trabajar al gemelo en la app, paso a paso.'],
+     [0,'La app relee los archivos','Las pestañas se actualizan solas; el chat se guarda en conversation.json.']]
+};
+var LOG = {
+ en:[['acc','▶ advance · project "sample-project"'],['ok','✓ Claude account connected'],['dim','$ claude -p "/advance sample-project"'],['','  read  projects/sample-project/status.md\n  write projects/sample-project/02-definition.md'],['','  step 3/4 · drafting the definition…\n  step 4/4 · updating decisions.md'],['ok','✓ done · tabs refreshed · conversation.json saved']],
+ es:[['acc','▶ avanzar · proyecto "proyecto-ejemplo"'],['ok','✓ cuenta de Claude conectada'],['dim','$ claude -p "/advance proyecto-ejemplo"'],['','  lee     projects/proyecto-ejemplo/status.md\n  escribe projects/proyecto-ejemplo/02-definition.md'],['','  paso 3/4 · redactando la definición…\n  paso 4/4 · actualizando decisions.md'],['ok','✓ listo · pestañas actualizadas · conversation.json guardado']]
+};
+
+var CMDS = {
+ en:[['/onboarding','Build or update your profile from your CV, certificates and company context.'],
+     ['/need','Capture a business need, open a project and start discovery with questions.'],
+     ['/document','Document work you already delivered from a folder or files, with its map.'],
+     ['/advance','Move a project to its next step or phase once you approve.'],
+     ['/log','Log something you did as an achievement, with result and evidence.'],
+     ['/mentor','Career session: progress against your target role, gaps and growth plan.'],
+     ['/cv','Generate a CV tailored to a role or offer, a LinkedIn summary or a cover letter.'],
+     ['/offer','Analyse a job offer: fit score, gaps, tailored CV and interview prep.'],
+     ['/status','Active projects, pending decisions, recent achievements and next steps.']],
+ es:[['/onboarding','Construye o actualiza tu perfil a partir de tu CV, certificados y contexto de empresa.'],
+     ['/need','Captura una necesidad de negocio, abre un proyecto y arranca el descubrimiento.'],
+     ['/document','Documenta trabajo ya entregado a partir de una carpeta o archivos, con su mapa.'],
+     ['/advance','Avanza un proyecto a su siguiente paso o fase cuando lo apruebas.'],
+     ['/log','Registra algo que hiciste como logro, con resultado y evidencias.'],
+     ['/mentor','Sesión de carrera: progreso frente a tu rol objetivo, brechas y plan de desarrollo.'],
+     ['/cv','Genera un CV a medida de un puesto u oferta, un resumen de LinkedIn o una carta.'],
+     ['/offer','Analiza una oferta: encaje, brechas, CV a medida y preparación de entrevista.'],
+     ['/status','Proyectos activos, decisiones pendientes, logros recientes y próximos pasos.']]
+};
+
+var GAL = [
+ ['home.png','Home','Your workspace at a glance','Inicio','Tu espacio de un vistazo'],
+ ['twin-chat.png','Your twin','Buttons and chat, live progress','Tu gemelo','Botones y chat, progreso en vivo'],
+ ['project-map.png','Project map','Fact sheet + interactive diagram','Mapa del proyecto','Ficha + diagrama interactivo'],
+ ['offers.png','Job offers','Fit, gaps and a tailored application','Ofertas','Encaje, brechas y candidatura a medida'],
+ ['settings.png','Settings','Connect your AI, language and theme','Configuración','Conecta tu IA, idioma y tema'],
+ ['settings-dark.png','Dark mode','Settings in dark mode, backups','Modo oscuro','Configuración en modo oscuro, copias']
+];
+
+var lang = store.get('pt-lang') || ((navigator.language||'en').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+var theme = store.get('pt-theme'); // 'light' | 'dark' | null (system)
+var root = document.documentElement;
+var mqDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : {matches:false};
+function effTheme(){ return theme || (mqDark.matches ? 'dark' : 'light'); }
+function t(k){ return (T[lang] && T[lang][k]) || T.en[k] || k; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+/* ---------- theme ---------- */
+var SUN='<circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M1.5 12h2.5M20 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/>';
+var MOON='<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>';
+function applyTheme(){
+  if (theme) root.setAttribute('data-theme', theme); else root.removeAttribute('data-theme');
+  var dark = effTheme() === 'dark';
+  document.getElementById('themeIc').innerHTML = dark ? SUN : MOON;
+  document.getElementById('themeBtn').setAttribute('aria-label', dark ? t('themeToLight') : t('themeToDark'));
+  document.getElementById('privImg').src = 'images/privacy' + (lang === 'es' ? '-es' : '') + '-' + effTheme() + '.svg';
+}
+document.getElementById('themeBtn').addEventListener('click', function(){
+  theme = effTheme() === 'dark' ? 'light' : 'dark'; store.set('pt-theme', theme); applyTheme();
+});
+if (mqDark.addEventListener) mqDark.addEventListener('change', function(){ if (!theme) applyTheme(); });
+
+/* ---------- architecture ---------- */
+var current = 'claude';
+function renderPanel(){
+  var d = NODES[current][lang];
+  document.getElementById('archPanel').innerHTML = '<div class="fadein"><div class="tag">'+esc(d[1])+'</div><h3>'+esc(d[0])+'</h3><p>'+esc(d[2])+'</p><ul>'+d[3].map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>';
+  Array.prototype.forEach.call(document.querySelectorAll('.node'), function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-node') === current ? 'true' : 'false'); });
+}
+Array.prototype.forEach.call(document.querySelectorAll('.node'), function(b){
+  b.addEventListener('click', function(){ current = b.getAttribute('data-node'); renderPanel(); });
+});
+
+/* ---------- journey ---------- */
+var phase = 0, playing = !reduce, timer = null;
+var stepper = document.getElementById('stepper');
+function buildStepper(){
+  Array.prototype.slice.call(stepper.querySelectorAll('li')).forEach(function(li){ li.remove(); });
+  PHASES[lang].forEach(function(p, i){
+    var li = document.createElement('li'); li.setAttribute('role','presentation');
+    li.innerHTML = '<button class="step" type="button" role="tab" id="tab'+i+'" aria-controls="jcard" tabindex="-1"><span class="n">'+i+'</span><span class="lbl">'+esc(p[0])+'</span></button>';
+    li.firstChild.addEventListener('click', function(){ stop(); go(i); });
+    stepper.appendChild(li);
+  });
+}
+function go(i, focus){
+  phase = (i + 7) % 7;
+  var p = PHASES[lang][phase];
+  Array.prototype.forEach.call(stepper.querySelectorAll('.step'), function(b, k){
+    b.setAttribute('aria-selected', k === phase ? 'true' : 'false');
+    b.tabIndex = k === phase ? 0 : -1;
+    b.classList.toggle('done', k < phase);
+    if (k === phase && focus) b.focus();
+  });
+  var first = stepper.querySelector('li'), last = stepper.querySelectorAll('li')[6];
+  var fill = document.getElementById('stepFill');
+  if (first && last) {
+    var a = first.offsetLeft + first.offsetWidth / 2, cur = stepper.querySelectorAll('li')[phase];
+    fill.style.left = a + 'px';
+    fill.style.width = (cur.offsetLeft + cur.offsetWidth / 2 - a) + 'px';
+  }
+  var jc = document.getElementById('jcard');
+  jc.setAttribute('aria-labelledby','tab'+phase);
+  jc.innerHTML = '<div class="fadein"><div class="kicker">'+t('phase')+' '+phase+'</div><h3>'+esc(p[0])+'</h3><p>'+esc(p[1])+'</p><span class="approve"><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="9" fill="currentColor"/><path d="M5 9.2l2.7 2.7L13 6.5" fill="none" stroke="var(--card)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'+t('j_appr')+'</span></div>'
+    + '<dl class="jmeta fadein"><dt>'+t('j_out')+'</dt><dd><code>'+esc(p[2])+'</code></dd><dt>'+t('j_does')+'</dt><dd>'+esc(t('j_next'))+'</dd></dl>';
+  document.getElementById('jCount').textContent = t('phase') + ' ' + (phase + 1) + ' ' + t('of') + ' 7';
+}
+function setPlayBtn(){
+  var b = document.getElementById('jPlay');
+  b.setAttribute('aria-pressed', playing ? 'true' : 'false');
+  b.innerHTML = playing ? '<span aria-hidden="true">❚❚</span> ' + t('pause') : '<span aria-hidden="true">▶</span> ' + t('play');
+}
+function start(){ playing = true; clearInterval(timer); timer = setInterval(function(){ go(phase + 1); }, 3200); setPlayBtn(); }
+function stop(){ playing = false; clearInterval(timer); setPlayBtn(); }
+document.getElementById('jPrev').addEventListener('click', function(){ stop(); go(phase - 1); });
+document.getElementById('jNext').addEventListener('click', function(){ stop(); go(phase + 1); });
+document.getElementById('jPlay').addEventListener('click', function(){ playing ? stop() : start(); });
+document.getElementById('journey').addEventListener('keydown', function(e){
+  if (e.target.closest && e.target.closest('a,input,textarea')) return;
+  if (e.key === 'ArrowRight') { stop(); go(phase + 1, true); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft') { stop(); go(phase - 1, true); e.preventDefault(); }
+  else if (e.key === 'Home') { stop(); go(0, true); e.preventDefault(); }
+  else if (e.key === 'End') { stop(); go(6, true); e.preventDefault(); }
+});
+// pause autoplay when the section is off-screen
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(function(en){ en.forEach(function(x){ if (!x.isIntersecting) { clearInterval(timer); } else if (playing) { start(); } }); }).observe(document.getElementById('journey'));
+}
+window.addEventListener('resize', function(){ go(phase); });
+
+/* ---------- what happens ---------- */
+var seqTimer = null, seqIdx = -1;
+function renderSeq(){
+  var ol = document.getElementById('seqSteps');
+  ol.innerHTML = SEQ[lang].map(function(s, i){
+    return '<li><span class="num">'+(i+1)+'</span><div><span class="lane l'+s[0]+'">'+esc(LANES[lang][s[0]])+'</span><b>'+esc(s[1])+'</b><span class="d">'+esc(s[2])+'</span></div></li>';
+  }).join('');
+  document.getElementById('seqLog').innerHTML = '<span class="dim">' + (lang === 'es' ? '# pulsa «Reproducir»' : '# press “Play”') + '</span>\n<span class="caret"></span>';
+  seqIdx = -1; clearTimeout(seqTimer); setSeqBtn(false);
+}
+function setSeqBtn(running){
+  var b = document.getElementById('seqPlay');
+  b.disabled = running;
+  b.innerHTML = running ? t('seq_running') : '<span aria-hidden="true">▶</span> ' + (seqIdx >= 5 ? t('seq_again') : t('seq_play'));
+}
+function seqStep(){
+  seqIdx++;
+  var ol = document.getElementById('seqSteps'), lis = ol.querySelectorAll('li');
+  ol.classList.add('running');
+  Array.prototype.forEach.call(lis, function(li, k){ li.classList.toggle('on', k === seqIdx); li.classList.toggle('past', k < seqIdx); });
+  var log = document.getElementById('seqLog');
+  var html = LOG[lang].slice(0, seqIdx + 1).map(function(l){ return '<span class="'+l[0]+'">'+esc(l[1])+'</span>'; }).join('\n');
+  log.innerHTML = html + '\n<span class="caret"></span>';
+  if (seqIdx < 5) seqTimer = setTimeout(seqStep, reduce ? 900 : 1500);
+  else seqTimer = setTimeout(function(){ ol.classList.remove('running'); Array.prototype.forEach.call(lis, function(li){ li.classList.remove('on','past'); }); setSeqBtn(false); }, 1600);
+}
+document.getElementById('seqPlay').addEventListener('click', function(){ seqIdx = -1; setSeqBtn(true); seqStep(); });
+
+/* ---------- commands & gallery ---------- */
+function renderCmds(){
+  document.getElementById('cmds').innerHTML = CMDS[lang].map(function(c){ return '<article class="cmd"><code>'+esc(c[0])+'</code><p>'+esc(c[1])+'</p></article>'; }).join('');
+  document.getElementById('gal').innerHTML = GAL.map(function(g){
+    var ti = lang === 'es' ? g[3] : g[1], de = lang === 'es' ? g[4] : g[2];
+    return '<figure><a href="images/'+g[0]+'" target="_blank" rel="noopener"><img src="images/'+g[0]+'" alt="'+esc(ti+': '+de)+'" loading="lazy"></a><figcaption><b>'+esc(ti)+'</b> · '+esc(de)+'</figcaption></figure>';
+  }).join('');
+}
+
+/* ---------- copy ---------- */
+document.getElementById('copyBtn').addEventListener('click', function(){
+  var b = this;
+  var txt = 'git clone https://github.com/MaiBP/professional-twin.git\ncd professional-twin\nnpm install\nnpm run init\nnpm start';
+  function done(){ b.textContent = t('copied'); setTimeout(function(){ b.textContent = t('copy'); }, 1600); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function(){});
+  else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} ta.remove(); }
+});
+
+/* ---------- language ---------- */
+function applyLang(){
+  root.lang = lang;
+  document.title = lang === 'es' ? 'Gemelo profesional · Professional Twin' : 'Professional Twin';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
+  document.getElementById('langLbl').textContent = lang === 'es' ? 'EN' : 'ES';
+  document.getElementById('langBtn').setAttribute('aria-label', t('langAria'));
+  document.getElementById('privImg').alt = t('priv_alt');
+  renderPanel(); buildStepper(); go(phase); setPlayBtn(); renderSeq(); renderCmds(); applyTheme();
+}
+document.getElementById('langBtn').addEventListener('click', function(){ lang = lang === 'es' ? 'en' : 'es'; store.set('pt-lang', lang); applyLang(); });
+
+applyLang();
+if (playing) start();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# The person's private content: it lives only on this PC, never in git.
+# Created from templates/<lang>/ with `npm run init`.
+/profile/
+/context/
+/journal/
+/projects/
+/cv/
+/offers/
+
+# App settings (language and theme): private to each person
+/settings.json
+
+# Automatic backups made before a restore (private content)
+/backups/
+
+# Legacy Spanish-named private folders (older versions): never commit them either
+/perfil/
+/contexto/
+/bitacora/
+/proyectos/
+/ofertas/
+/copias/
+/ajustes.json
+
+# Dependencies, builds and environment
+node_modules/
+app/client/dist/
+.env
+*.log
+
+# Local Claude Code settings
+.claude/settings.local.json
