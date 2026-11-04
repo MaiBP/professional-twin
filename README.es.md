@@ -232,7 +232,7 @@ profile/ context/ journal/ projects/ cv/ offers/ backups/ settings.json   ← pr
 
 ## Contribuir
 
-Issues y pull requests son bienvenidos. Nunca incluyas contenido personal (nada de las carpetas privadas) en issues, capturas o PR.
+Haz un fork, ejecútalo en tu PC y adáptalo a ti: para eso no necesitas permiso. También son bienvenidas las contribuciones a este repositorio, y cada pull request se revisa antes de integrarse. Lee primero [CONTRIBUTING.md](CONTRIBUTING.md) (en inglés): explica qué se integra, qué es mejor dejar en tu fork y las reglas de privacidad (nunca incluyas nada de tus carpetas privadas en issues, capturas o PR).
 
 ## Licencia
 
