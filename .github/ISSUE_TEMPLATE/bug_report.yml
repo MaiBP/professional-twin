@@ -1,0 +1,71 @@
+name: Bug report
+description: Something in the app or the twin doesn't work as expected
+title: "fix: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Before you start:
+        - **Never paste personal content** (your profile, CV, projects, offers, company names, emails or paths with your user name). Use fictional data such as *Contoso* or `name@example.com`.
+        - Security problem (e.g. reading files outside the private folders, reaching the server from another machine)? **Don't open an issue** — use *Security → Report a vulnerability* instead.
+        - Please search existing issues first.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Step by step, with fictional data, so the bug can be reproduced on `main`.
+      placeholder: |
+        1. Go to Projects → …
+        2. Press …
+        3. See …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options:
+        - App (screens, buttons, forms)
+        - The twin (answers, documents it writes, commands)
+        - Project map / PDF export
+        - Job offers / CV
+        - Backups and restore
+        - Settings / connecting Claude
+        - Installation / start-up
+        - Terminal use (claude + commands)
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: App language
+      options: [English, Spanish]
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: Operating system, Node.js version (`node -v`), Claude Code version (`claude --version`) and browser.
+      placeholder: Windows 11 · Node 20.11 · Claude Code 2.x · Edge
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error messages or screenshots
+      description: Optional. Check them for personal data before posting.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This issue contains no personal data (names, emails, employers, CV or project content, paths with my user name).
+          required: true

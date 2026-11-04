@@ -1,0 +1,51 @@
+name: Feature proposal
+description: Propose an improvement for everyone who uses Professional Twin
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before proposing, please read [CONTRIBUTING.md](https://github.com/MaiBP/professional-twin/blob/main/CONTRIBUTING.md) — especially *The one rule* and *What gets declined*.
+        Anything that only makes sense for you, your company or your country is best built in your own fork (no permission needed).
+        Open ideas and questions fit better in **Discussions**. **Never include personal data.**
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or missing today, and for whom? Describe the situation, not the solution yet.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: How would it work from the app, for a non-technical person?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Could existing commands, templates or sections already cover it?
+  - type: checkboxes
+    id: fit
+    attributes:
+      label: Fit with the project
+      options:
+        - label: It helps any person, in any role, company or country (it is not specific to me or my employer).
+          required: true
+        - label: It keeps data on the user's PC and sends nothing to new external services.
+          required: true
+        - label: It can be used from the app, in English and Spanish.
+          required: true
+        - label: This proposal contains no personal data.
+          required: true
+  - type: dropdown
+    id: help
+    attributes:
+      label: Would you like to build it?
+      options:
+        - Yes, I'd open a PR after we agree on the approach
+        - Maybe, with some guidance
+        - No, just proposing

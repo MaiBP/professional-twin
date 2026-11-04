@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/MaiBP/professional-twin/discussions
+    about: Ask how to use or customise Professional Twin, or discuss an idea before proposing it.
+  - name: Report a security vulnerability
+    url: https://github.com/MaiBP/professional-twin/security/advisories/new
+    about: Report security problems privately — please don't open a public issue.
