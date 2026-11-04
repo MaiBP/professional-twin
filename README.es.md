@@ -16,7 +16,8 @@ mientras convierte todo lo que haces en evidencia para tu CV y tu plan de carrer
 
 **▶ Recorrido interactivo:** [maibp.github.io/professional-twin](https://maibp.github.io/professional-twin/)
 
-<a href="https://www.buymeacoffee.com/TU_USUARIO" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="48"></a>
+
+<a href='https://ko-fi.com/Z5V229ZZE4' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=6' border='0' alt='Support me' /></a>
 
 </div>
 
@@ -241,6 +242,7 @@ Issues y pull requests son bienvenidos. Nunca incluyas contenido personal (nada 
 
 Si Professional Twin te ayuda a crecer profesionalmente, puedes invitarme a un café ☕
 
-<a href="https://www.buymeacoffee.com/TU_USUARIO" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="48"></a>
+
+<a href='https://ko-fi.com/Z5V229ZZE4' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=6' border='0' alt='Support me' /></a>
 
 <sub>Professional Twin es un proyecto independiente de código abierto, sin relación ni respaldo de Anthropic. Claude y Claude Code son productos de Anthropic.</sub>
