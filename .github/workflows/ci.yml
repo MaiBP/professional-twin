@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Build and privacy check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Privacy guard (no personal data, private folders stay ignored)
+        run: npm run check:privacy
+
+      - name: Server and scripts parse
+        run: for f in app/server/*.mjs app/shared/*.mjs scripts/*.mjs; do node --check "$f"; done
+
+      - name: Client builds
+        run: npm run build

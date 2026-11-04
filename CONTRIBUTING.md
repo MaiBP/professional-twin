@@ -117,17 +117,18 @@ This project is built with Claude Code, and using AI to contribute is welcome. Y
 2. Create a branch in your fork from `main`.
 3. Check locally:
    ```bash
-   npm run build                      # the client must build without errors
-   node --check app/server/*.mjs      # server files must parse
+   npm run check                      # privacy guard + client build (the same checks CI runs)
    npm start                          # try your change in the app, in English and Spanish, light and dark theme
    ```
 4. If you touched the twin (skills, `CLAUDE.md`, actions), run the affected command at least once on a workspace with **fictional data** and check that the app still reads the files it produces.
-5. Check that no personal data entered your diff (`git diff main` — names, emails, paths).
+5. Check that no personal data entered your diff (`git diff main` — names, emails, paths). The privacy guard catches private folders, emails and user paths, but not everything: names and companies are on you.
 6. Fill in the pull request template.
 
 When opening the PR from your fork, make sure the **base repository** is `MaiBP/professional-twin` and the base branch is `main`.
 
 ## How review works
+
+- Every pull request runs **CI** automatically: the privacy guard (`scripts/check-privacy.mjs`), a syntax check of the server and scripts, and the client build. A PR with a red check is not reviewed until it is green.
 
 - Every PR is reviewed by the maintainer before merging. There is no guaranteed timeline — this is a personal open-source project.
 - Reviews are practical: the bug is reproduced on `main`, then the fix is tested; features are tried in the app as a non-technical user would.
@@ -144,4 +145,4 @@ Don't open a public issue for a vulnerability (for example, a way to read files 
 
 Use **Discussions** for questions, ideas and proposals, and **Issues** for confirmed bugs. Please search first — your question may already have an answer.
 
-Be kind and constructive. Treat everyone with respect; harassment or discrimination of any kind is not tolerated.
+Everyone taking part in this project follows the [Code of Conduct](CODE_OF_CONDUCT.md). Be kind and constructive.

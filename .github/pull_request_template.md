@@ -13,7 +13,7 @@ Closes #
 - [ ] I read [CONTRIBUTING.md](../CONTRIBUTING.md) and this fits "the one rule" (person-agnostic, local-first, Claude Code-native, usable from the app, bilingual).
 - [ ] No personal data in the diff, screenshots or test data (names, emails, employers, paths with my user name).
 - [ ] Private folders and `settings.json` are still in `.gitignore`.
-- [ ] `npm run build` passes and I tried the change with `npm start`.
+- [ ] `npm run check` passes (privacy guard + build) and I tried the change with `npm start`.
 - [ ] New or changed UI texts exist in English **and** Spanish (`L(en, es)`).
 - [ ] Template changes are in both `templates/en/` and `templates/es/`.
 - [ ] If I changed a file format (`status.md`, `achievements.md`, `offer.md`, ```map), the parsers, templates and skills are updated and existing files still work.

@@ -227,7 +227,7 @@ profile/ context/ journal/ projects/ cv/ offers/ backups/ settings.json   ← pr
 
 ## Contributing
 
-Fork it, run it locally and make it yours — that needs no permission. Contributions back to this repository are welcome too, and every pull request is reviewed before merging. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it explains what gets merged, what is better kept in your fork, and the privacy rules (never include anything from your private folders in issues, screenshots or PRs).
+Fork it, run it locally and make it yours — that needs no permission. Contributions back to this repository are welcome too, and every pull request is reviewed before merging. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it explains what gets merged, what is better kept in your fork, and the privacy rules. Everyone follows the [Code of Conduct](CODE_OF_CONDUCT.md). Never include anything from your private folders in issues, screenshots or PRs.
 
 ## License
 
