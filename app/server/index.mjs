@@ -126,12 +126,12 @@ app.use('/api', (req, res, next) => {
 app.use(express.json({ limit: '2mb' }));
 
 // --- Settings: language and theme ---------------------------------------------
-// GET returns { language, theme }; POST takes a partial change, validates it, saves it in settings.json and returns the full object.
+// GET returns { language, theme, model }; POST takes a partial change, validates it, saves it in settings.json and returns the full object.
 app.get('/api/settings', (req, res) => res.json(settings()));
 app.post('/api/settings', (req, res) => {
-  const { language: newLanguage, theme } = req.body ?? {};
+  const { language: newLanguage, theme, model } = req.body ?? {};
   try {
-    res.json(saveSettings({ language: newLanguage, theme }));
+    res.json(saveSettings({ language: newLanguage, theme, model }));
   } catch (e) {
     throw new HttpError(e.status ?? 500, e.message);
   }
@@ -426,6 +426,7 @@ app.post('/api/config/ai/connect', withErrors((req) => config.startLogin(req.bod
 app.post('/api/config/ai/code', withErrors((req) => config.sendCode(req.body?.code)));
 app.post('/api/config/ai/cancel', withErrors(() => { config.cancelLogin(); return { ok: true }; }));
 app.post('/api/config/ai/disconnect', withErrors(() => config.disconnect()));
+app.post('/api/config/ai/test', withErrors((req) => config.testModel(req.body?.model)));
 app.post('/api/config/shortcut', withErrors(() => config.createShortcut()));
 // --- Backups ------------------------------------------------------------------
 const backups = createBackups({ ROOT, PRIVATE, HttpError, twin, init });

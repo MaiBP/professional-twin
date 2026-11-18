@@ -86,6 +86,15 @@ export default function Twin({ type, id, title = L('Your twin', 'Tu gemelo'), in
           {visible.map((m, i) => (
             <div key={i} className={`bubble ${m.role} ${m.notice ? 'warning' : ''}`}>
               {m.role === 'twin' ? <Markdown text={m.text} /> : <p>{m.text}</p>}
+              {m.action === 'settings' && (
+                <a className="button button-secondary bubble-action" href="#/settings">{L('Go to Settings', 'Ir a Configuración')}</a>
+              )}
+              {m.detail && (
+                <details className="bubble-detail">
+                  <summary>{L('Technical detail', 'Detalle técnico')}</summary>
+                  <pre>{m.detail}</pre>
+                </details>
+              )}
               <span className="bubble-time">{formatTime(m.date)}</span>
             </div>
           ))}

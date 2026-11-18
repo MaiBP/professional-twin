@@ -3,8 +3,9 @@
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
-import { L, language } from './i18n.mjs';
+import { L, language, model } from './i18n.mjs';
 import { convertConversation } from './legacy.mjs';
+import { explainFailure } from './failures.mjs';
 
 const MAX_CONCURRENT = 3;
 const TIME_LIMIT_MS = 20 * 60 * 1000;
@@ -169,24 +170,34 @@ export function createTwin({ ROOT, safePath, HttpError }) {
 
     const args = ['-p', '--output-format', 'stream-json', '--verbose', '--permission-mode', 'acceptEdits',
       '--append-system-prompt', APP_INSTRUCTIONS[language()] ?? APP_INSTRUCTIONS.en, '--allowedTools', ...TOOLS];
+    const chosenModel = model();
+    if (chosenModel !== 'auto') args.push('--model', chosenModel);
     for (const d of extraFolders(type, id)) args.push('--add-dir', d);
     if (c.session) args.push('--resume', c.session);
 
     const child = spawn(process.env.CLAUDE_BIN ?? 'claude', args, { cwd: ROOT, windowsHide: true, env: process.env });
     active.set(key, child);
-    const timer = setTimeout(() => child.kill(), TIME_LIMIT_MS);
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; child.kill(); }, TIME_LIMIT_MS);
     let rest = '';
     let result = null;
+    let rateLimit = null;
     let lastText = '';
     let errorText = '';
-    let noClaude = false;
+    let spawnError = null;
+    let sessionId = null;
+    let worked = false;
 
     const handle = (line) => {
       let ev;
       try { ev = JSON.parse(line); } catch { return; }
+      if (ev.type === 'rate_limit_event') rateLimit = ev.rate_limit_info ?? null;
+      // The session is only kept if the run works (see 'close'): a failed run (model not allowed,
+      // limit reached…) opens an empty session that could not be resumed later.
+      if (ev.session_id) sessionId = ev.session_id;
       const current = read(type, id);
-      if (ev.session_id) current.session = ev.session_id;
-      if (ev.type === 'assistant') {
+      if (ev.type === 'assistant' && ev.message?.model !== '<synthetic>') {
+        worked = true;
         for (const part of ev.message?.content ?? []) {
           if (part.type === 'tool_use') {
             const s = step(part);
@@ -208,10 +219,7 @@ export function createTwin({ ROOT, safePath, HttpError }) {
       lines.filter(Boolean).forEach(handle);
     });
     child.stderr.on('data', (d) => { errorText = (errorText + d.toString('utf8')).slice(-2000); });
-    child.on('error', (e) => {
-      noClaude = e.code === 'ENOENT';
-      errorText = noClaude ? L('I could not find Claude Code on this PC.', 'No encontré Claude Code en este PC.') : e.message;
-    });
+    child.on('error', (e) => { spawnError = e; });
     child.on('close', (code) => {
       clearTimeout(timer);
       if (rest.trim()) handle(rest);
@@ -219,6 +227,8 @@ export function createTwin({ ROOT, safePath, HttpError }) {
       const end = read(type, id);
       const ok = result && !result.is_error;
       const reply = result?.result?.trim() || lastText.trim();
+      // Keep the conversation if the twin actually worked (finished, or stopped halfway after doing something).
+      if (sessionId && (ok || ((child.stopped || timedOut) && worked))) end.session = sessionId;
       if (ok && reply) {
         end.messages.push({ role: 'twin', text: reply, date: new Date().toISOString() });
         end.state = 'idle';
@@ -231,13 +241,14 @@ export function createTwin({ ROOT, safePath, HttpError }) {
         });
         end.state = 'idle';
       } else {
-        console.error(`[twin] ${key} ended with code ${code}: ${errorText}`);
+        const f = explainFailure({
+          result, rateLimit, stderr: errorText, spawnError, timedOut, model: chosenModel, limitMinutes: TIME_LIMIT_MS / 60000,
+        });
+        console.error(`[twin] ${key} ended with code ${code} (${f.code}): ${f.detail ?? ''}`);
+        // If the previous conversation can't be resumed, the next message starts a new one.
+        if (f.code === 'resume') end.session = null;
         end.messages.push({
-          role: 'twin',
-          text: noClaude ? errorText : L(
-            'I could not finish this task. Try again in a moment; if it happens again, check that Claude Code is signed in on this PC.',
-            'No pude terminar esta tarea. Prueba de nuevo en un momento; si se repite, revisa que Claude Code tenga la sesión iniciada en este PC.',
-          ),
+          role: 'twin', text: f.text, detail: f.detail, action: f.action, reason: f.code,
           date: new Date().toISOString(), notice: true,
         });
         end.state = 'error';

@@ -21,6 +21,18 @@
 .bubble.user { align-self: flex-end; background: var(--accent); color: var(--accent-text); border-bottom-right-radius: 4px; white-space: pre-wrap; }
 .bubble.twin { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 4px; }
 .bubble.twin.warning { background: var(--warning-soft); color: var(--warning); }
+.bubble-action { display: inline-flex; margin: .5rem 0 .25rem; }
+.bubble-detail { margin-top: .4rem; font-size: .8rem; }
+.bubble-detail summary { font-weight: 500; opacity: .85; }
+.bubble-detail pre { margin: .35rem 0 0; padding: .5rem .6rem; border-radius: 6px; background: var(--surface); color: var(--muted); white-space: pre-wrap; word-break: break-word; font-size: .75rem; max-height: 10rem; overflow: auto; }
+
+/* Settings: model the twin uses */
+.twin-model { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.twin-model h3 { margin: 0 0 .25rem; font-size: 1rem; }
+.model-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 .75rem; }
+.model-options .radio-option { margin: .35rem 0; }
+.model-tag { display: inline-block; margin-left: .35rem; padding: 0 .4rem; border-radius: 999px; font-size: .7rem; font-weight: 600; background: var(--accent-soft); color: var(--accent); vertical-align: middle; }
+.model-test { margin-top: .75rem; }
 .bubble .md h1, .bubble .md h2 { font-size: 1rem; border: none; margin: .5rem 0 .25rem; padding: 0; }
 .bubble .md ul, .bubble .md ol { padding-left: 1.2rem; margin: .3rem 0; }
 .bubble-time { display: block; font-size: .7rem; opacity: .7; margin-top: .2rem; text-align: right; }

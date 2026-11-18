@@ -2,7 +2,8 @@
 // The app stores no credentials: sign-in is handled by Claude Code in its own configuration.
 import { execFile, spawn } from 'node:child_process';
 import { join } from 'node:path';
-import { L } from './i18n.mjs';
+import { L, MODELS, model as savedModel } from './i18n.mjs';
+import { explainFailure } from './failures.mjs';
 
 const CLAUDE = process.env.CLAUDE_BIN ?? 'claude';
 const CACHE_MS = 30000;
@@ -128,6 +129,56 @@ export function createSettings({ ROOT, HttpError }) {
     }, next);
   };
 
+  // Sends a tiny message with the chosen model to check that this account can use it.
+  // Returns { ok: true, modelId } or { ok: false, code, text, detail }: a failure is an answer, not an HTTP error.
+  function testModel(requested) {
+    const chosen = requested ?? savedModel();
+    if (!MODELS.includes(chosen)) throw new HttpError(400, L('Invalid model', 'Modelo no válido'));
+    const args = ['-p', '--output-format', 'stream-json', '--verbose', '--max-turns', '1'];
+    if (chosen !== 'auto') args.push('--model', chosen);
+    return new Promise((done) => {
+      const child = spawn(CLAUDE, args, { cwd: ROOT, windowsHide: true, env: process.env });
+      let rest = '';
+      let stderr = '';
+      let result = null;
+      let rateLimit = null;
+      let spawnError = null;
+      let timedOut = false;
+      const timer = setTimeout(() => { timedOut = true; child.kill(); }, 90000);
+      const handle = (line) => {
+        let ev;
+        try { ev = JSON.parse(line); } catch { return; }
+        if (ev.type === 'rate_limit_event') rateLimit = ev.rate_limit_info ?? null;
+        if (ev.type === 'result') result = ev;
+      };
+      child.stdout.on('data', (d) => {
+        rest += d.toString('utf8');
+        const lines = rest.split('\n');
+        rest = lines.pop();
+        lines.filter(Boolean).forEach(handle);
+      });
+      child.stderr.on('data', (d) => { stderr = (stderr + d.toString('utf8')).slice(-2000); });
+      child.on('error', (e) => { spawnError = e; });
+      child.on('close', () => {
+        clearTimeout(timer);
+        if (rest.trim()) handle(rest);
+        if (result && !result.is_error) {
+          const modelId = Object.keys(result.modelUsage ?? {})[0] ?? null;
+          return done({ ok: true, model: chosen, modelId });
+        }
+        if (timedOut) {
+          return done({ ok: false, model: chosen, code: 'timeout', detail: null, text: L(
+            'Claude did not answer within 90 seconds. Check your internet connection and try again.',
+            'Claude no respondió en 90 segundos. Revisa tu conexión a internet y vuelve a probar.',
+          ) });
+        }
+        const f = explainFailure({ result, rateLimit, stderr, spawnError, model: chosen });
+        return done({ ok: false, model: chosen, code: f.code, text: f.text, detail: f.detail });
+      });
+      child.stdin.end('Reply with just the word: ok');
+    });
+  }
+
   // Desktop shortcut that starts the app (if it is not running) and opens it in the browser.
   function createShortcut() {
     if (process.platform !== 'win32') {
@@ -154,5 +205,5 @@ export function createSettings({ ROOT, HttpError }) {
       : ok({ desktop: stdout.trim() }))));
   }
 
-  return { status, startLogin, sendCode, cancelLogin, disconnect, requireAI, createShortcut };
+  return { status, startLogin, sendCode, cancelLogin, disconnect, requireAI, testModel, createShortcut };
 }

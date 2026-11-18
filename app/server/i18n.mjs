@@ -1,12 +1,14 @@
-// App language and settings. `settings.json` (repo root, private) stores { language, theme }.
-// Defaults: English and the system theme. L(en, es) returns the text in the current language.
+// App language and settings. `settings.json` (repo root, private) stores { language, theme, model }.
+// Defaults: English, the system theme and Claude Code's own model. L(en, es) returns the text in the current language.
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const LANGUAGES = ['en', 'es'];
 export const THEMES = ['system', 'light', 'dark'];
-const DEFAULTS = { language: 'en', theme: 'system' };
+// Model the twin runs with (a Claude Code alias). 'auto' = whatever Claude Code uses by default on this PC.
+export const MODELS = ['auto', 'fable', 'opus', 'sonnet', 'haiku'];
+const DEFAULTS = { language: 'en', theme: 'system', model: 'auto' };
 
 let root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 let current = { ...DEFAULTS };
@@ -19,6 +21,7 @@ function normalize(data) {
   return {
     language: LANGUAGES.includes(d.language) ? d.language : DEFAULTS.language,
     theme: THEMES.includes(d.theme) ? d.theme : DEFAULTS.theme,
+    model: MODELS.includes(d.model) ? d.model : DEFAULTS.model,
   };
 }
 
@@ -51,11 +54,13 @@ export function settings() {
 }
 
 export const language = () => settings().language;
+export const model = () => settings().model;
+export const locale = () => (language() === 'es' ? 'es-ES' : 'en-GB');
 
 // Text in the current language.
 export const L = (en, es) => (language() === 'es' ? es : en);
 
-// Saves a partial change { language?, theme? }. Throws a 400 error if a value is not valid.
+// Saves a partial change { language?, theme?, model? }. Throws a 400 error if a value is not valid.
 export function saveSettings(changes = {}) {
   const c = changes && typeof changes === 'object' ? changes : {};
   const error = (msg) => Object.assign(new Error(msg), { status: 400 });
@@ -65,9 +70,13 @@ export function saveSettings(changes = {}) {
   if (c.theme !== undefined && !THEMES.includes(c.theme)) {
     throw error(L(`Invalid theme. Use one of: ${THEMES.join(', ')}.`, `Tema no válido. Usa uno de: ${THEMES.join(', ')}.`));
   }
+  if (c.model !== undefined && !MODELS.includes(c.model)) {
+    throw error(L(`Invalid model. Use one of: ${MODELS.join(', ')}.`, `Modelo no válido. Usa uno de: ${MODELS.join(', ')}.`));
+  }
   const next = { ...settings() };
   if (c.language !== undefined) next.language = c.language;
   if (c.theme !== undefined) next.theme = c.theme;
+  if (c.model !== undefined) next.model = c.model;
   writeFileSync(file(), `${JSON.stringify(next, null, 2)}\n`, 'utf8');
   current = next;
   readMs = statSync(file()).mtimeMs;

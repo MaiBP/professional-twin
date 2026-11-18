@@ -69,6 +69,81 @@ function Connect({ onDone, onCancel, switching }) {
   );
 }
 
+// A function (not a constant) so the texts follow the language loaded at startup.
+const modelOptions = () => [
+  { id: 'auto', name: L('Automatic', 'Automático'), text: L('Whatever Claude Code uses by default on this PC.', 'El que use Claude Code por defecto en este PC.') },
+  { id: 'opus', name: 'Opus', recommended: true, text: L('Very capable for analysis, plans and documents. Included in Claude plans.', 'Muy capaz para análisis, planes y documentos. Incluido en los planes de Claude.') },
+  { id: 'sonnet', name: 'Sonnet', text: L('Balanced and faster. A good option if you hit the usage limit.', 'Equilibrado y más rápido. Buena opción si llegas al límite de uso.') },
+  { id: 'haiku', name: 'Haiku', text: L('The fastest and lightest, for simple tasks.', 'El más rápido y ligero, para tareas sencillas.') },
+  { id: 'fable', name: 'Fable', text: L('The most capable. On some plans it needs extra usage credits.', 'El más capaz. En algunos planes necesita créditos de uso extra.') },
+];
+const modelName = (id) => modelOptions().find((m) => m.id === id)?.name ?? id;
+
+// Model the twin works with: it is saved as soon as it is chosen and tested with a tiny message.
+function TwinModel() {
+  const { data: saved } = useData('/api/settings', { every: 0 });
+  const [model, setModel] = useState(null);
+  const [test, setTest] = useState(null); // { state: 'busy' | 'ok' | 'error', ... }
+  const [error, setError] = useState(null);
+  const current = model ?? saved?.model ?? 'auto';
+
+  const runTest = async (id) => {
+    setTest({ state: 'busy', model: id });
+    try {
+      const r = await api.post('/api/config/ai/test', { model: id });
+      setTest({ state: r.ok ? 'ok' : 'error', ...r });
+    } catch (e) { setTest({ state: 'error', model: id, text: e.message }); }
+  };
+  const choose = async (id) => {
+    if (id === current) return;
+    const before = current;
+    setModel(id); setError(null);
+    try {
+      await api.post('/api/settings', { model: id });
+      runTest(id);
+    } catch (e) { setModel(before); setError(e.message); }
+  };
+
+  return (
+    <div className="twin-model">
+      <h3>{L('Model your twin uses', 'Modelo que usa el gemelo')}</h3>
+      <p className="muted">{L('Each model has a different balance of quality, speed and usage. If your twin tells you the model is not available or you reached the limit, choose another one here.', 'Cada modelo equilibra de forma distinta calidad, rapidez y consumo. Si el gemelo te dice que el modelo no está disponible o que llegaste al límite, elige otro aquí.')}</p>
+      <div className="model-options" role="radiogroup" aria-label={L('Model', 'Modelo')}>
+        {modelOptions().map((m) => (
+          <label key={m.id} className="radio-option">
+            <input type="radio" name="model" checked={current === m.id} onChange={() => choose(m.id)} disabled={test?.state === 'busy'} />
+            <span>
+              <strong>{m.name}{m.recommended && <span className="model-tag">{L('Recommended', 'Recomendado')}</span>}</strong>
+              <span className="muted">{m.text}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+      {error && <div className="card warning">{error}</div>}
+      <div className="model-test">
+        {test?.state === 'busy' && <p className="muted"><span className="spinner" aria-hidden="true" /> {L(`Checking that your account can use ${modelName(test.model)}…`, `Comprobando que tu cuenta puede usar ${modelName(test.model)}…`)}</p>}
+        {test?.state === 'ok' && (
+          <div className="card success">
+            {L(`It works: your twin will use ${modelName(test.model)}.`, `Funciona: el gemelo usará ${modelName(test.model)}.`)}
+            {test.modelId && <span className="muted"> ({test.modelId})</span>}
+          </div>
+        )}
+        {test?.state === 'error' && (
+          <div className="card warning">
+            <p>{test.text}</p>
+            {test.detail && (
+              <details className="bubble-detail"><summary>{L('Technical detail', 'Detalle técnico')}</summary><pre>{test.detail}</pre></details>
+            )}
+          </div>
+        )}
+        {test?.state !== 'busy' && (
+          <button className="button button-secondary" onClick={() => runTest(current)}>{L('Test model', 'Probar modelo')}</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function YourAi() {
   const { data: s, reload } = useData('/api/config/ai?refresh=1', { every: 0 });
   const [switching, setSwitching] = useState(false);
@@ -120,6 +195,7 @@ function YourAi() {
             <button className="button button-secondary" onClick={disconnect}>{L('Disconnect', 'Desconectar')}</button>
             <button className="button button-secondary" onClick={() => { setSwitching(true); setNotice(null); }}>{L('Switch account', 'Cambiar de cuenta')}</button>
           </div>
+          <TwinModel />
         </>
       )}
 
